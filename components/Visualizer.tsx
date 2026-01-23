@@ -4,37 +4,29 @@ import { OrbitControls, Grid, PerspectiveCamera, Line, Html, Text, RoundedBox } 
 import * as THREE from 'three';
 import { AntennaConfig } from '../types';
 
+// Fix for TypeScript not recognizing R3F elements in JSX.IntrinsicElements
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      group: any;
+      mesh: any;
+      meshStandardMaterial: any;
+      meshBasicMaterial: any;
+      shapeGeometry: any;
+      cylinderGeometry: any;
+      ambientLight: any;
+      spotLight: any;
+      pointLight: any;
+      directionalLight: any;
+    }
+  }
+}
+
 interface VisualizerProps {
   config: AntennaConfig;
 }
 
 const FlightControllerModel = () => {
-  // Logo parts derived from Corvon branding
-  const logoParts = useMemo(() => {
-    const gap = 0.0015;
-    const outerRadius = 0.01;
-    const innerRadius = 0.005;
-
-    // Upper Semi-circle
-    const topShape = new THREE.Shape();
-    topShape.absarc(0, gap, outerRadius, 0, Math.PI, false);
-    topShape.lineTo(-outerRadius, gap);
-    topShape.lineTo(-innerRadius, gap);
-    topShape.absarc(0, gap, innerRadius, Math.PI, 0, true);
-    topShape.lineTo(outerRadius, gap);
-
-    // Lower V-shape
-    const bottomShape = new THREE.Shape();
-    bottomShape.moveTo(-outerRadius, -gap);
-    bottomShape.lineTo(-innerRadius, -gap);
-    bottomShape.absarc(0, -gap, innerRadius, Math.PI, 0, true);
-    bottomShape.lineTo(outerRadius, -gap);
-    bottomShape.lineTo(0, -0.02);
-    bottomShape.lineTo(-outerRadius, -gap);
-
-    return [topShape, bottomShape];
-  }, []);
-
   // Forward indicator arrow
   const directionArrow = useMemo(() => {
     const s = new THREE.Shape();
@@ -74,36 +66,29 @@ const FlightControllerModel = () => {
            <meshBasicMaterial color="#ef4444" />
         </mesh>
 
-        {/* Branding Logo */}
-        <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI]}>
-          <shapeGeometry args={[logoParts]} />
-          <meshBasicMaterial color="#111" side={THREE.DoubleSide} />
-        </mesh>
-        
-        {/* CORVON Label - Extra Bold with Outline for visual weight */}
+        {/* CORVON Brand Text - Restored */}
         <Text
-          position={[0, -0.023, 0]} 
-          fontSize={0.007}
-          color="#111"
+          position={[0, -0.005, 0]} 
+          fontSize={0.009}
+          color="#18181b" 
           font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff"
           anchorX="center"
           anchorY="middle"
           fontWeight={900}
-          outlineWidth={0.0003} 
-          outlineColor="#111"
+          letterSpacing={-0.02}
         >
           CORVON
         </Text>
 
-        {/* FLIGHT CONTROLLER Label - Extra Bold */}
+        {/* FLIGHT CONTROLLER Label */}
         <Text
-          position={[0, -0.030, 0]} 
-          fontSize={0.0025}
-          color="#444" 
+          position={[0, -0.022, 0]} 
+          fontSize={0.003}
+          color="#52525b" 
           font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff"
           anchorX="center"
           anchorY="middle"
-          fontWeight={900}
+          fontWeight={800}
           letterSpacing={0.05}
         >
           FLIGHT CONTROLLER
@@ -158,14 +143,14 @@ const Scene = ({ config }: VisualizerProps) => {
       <PerspectiveCamera 
         makeDefault 
         position={[0.4, 0.4, 0.4]} 
-        near={0.001} // 关键修复：允许相机离物体非常近而不发生裁剪/破裂
+        near={0.001} 
         far={100}
       />
       
       <OrbitControls 
         makeDefault 
-        minDistance={0.08} // 最近距离：8cm，刚好可以看清飞控细节
-        maxDistance={8}    // 最远距离：8m，足以覆盖最大 +/-2m 的天线范围
+        minDistance={0.08} 
+        maxDistance={8}   
       />
       
       <ambientLight intensity={0.7} />
