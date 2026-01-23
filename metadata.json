@@ -1,0 +1,5 @@
+{
+  "name": "CORVON RTK-12 dual-antanna Configurator（APM）",
+  "description": "A 3D visualization tool to calculate ArduPilot GPS-for-Yaw parameters (Moving Baseline) for the CORVON dual-antenna RTK system.",
+  "requestFramePermissions": []
+}
