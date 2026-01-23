@@ -76,7 +76,7 @@ const FlightControllerModel = () => {
 
         {/* Branding Logo */}
         <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI]}>
-          <shapeGeometry args={logoParts} />
+          <shapeGeometry args={[logoParts]} />
           <meshBasicMaterial color="#111" side={THREE.DoubleSide} />
         </mesh>
         
