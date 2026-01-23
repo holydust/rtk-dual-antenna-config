@@ -1,26 +1,9 @@
+
 import React, { useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, PerspectiveCamera, Line, Html, Text, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 import { AntennaConfig } from '../types';
-
-// Fix for TypeScript not recognizing R3F elements in JSX.IntrinsicElements
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      group: any;
-      mesh: any;
-      meshStandardMaterial: any;
-      meshBasicMaterial: any;
-      shapeGeometry: any;
-      cylinderGeometry: any;
-      ambientLight: any;
-      spotLight: any;
-      pointLight: any;
-      directionalLight: any;
-    }
-  }
-}
 
 interface VisualizerProps {
   config: AntennaConfig;

@@ -1,4 +1,3 @@
-
 export interface Vector3D {
   x: number;
   y: number;
@@ -17,5 +16,5 @@ export interface ArduParams {
   GPS1_MB_OFS_Z: number;
   GPS1_POS_X: number;
   GPS1_POS_Y: number;
-  GPS2_POS_Z: number;
+  GPS1_POS_Z: number;
 }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ArduParams } from '../types';
 import { Clipboard, CheckCircle2 } from 'lucide-react';
@@ -49,7 +48,7 @@ export const ParamsOutput: React.FC<ParamsOutputProps> = ({ params }) => {
       `GPS1_MB_OFS_Z = ${params.GPS1_MB_OFS_Z.toFixed(3)}`,
       `GPS1_POS_X = ${params.GPS1_POS_X.toFixed(3)}`,
       `GPS1_POS_Y = ${params.GPS1_POS_Y.toFixed(3)}`,
-      `GPS2_POS_Z = ${params.GPS2_POS_Z.toFixed(3)}`,
+      `GPS1_POS_Z = ${params.GPS1_POS_Z.toFixed(3)}`,
     ].join('\n');
     navigator.clipboard.writeText(text);
     alert('All parameters copied to clipboard!');
@@ -62,7 +61,7 @@ export const ParamsOutput: React.FC<ParamsOutputProps> = ({ params }) => {
       </div>
 
       <div className="space-y-3">
-        {/* Fixed Parameters Section - No Label as requested */}
+        {/* Fixed Parameters Section */}
         <div className="flex flex-col gap-1">
           <ParamItem name="GPS1_TYPE" value={25} isFixed={true} />
           <ParamItem name="GPS1_MB_TYPE" value={params.GPS1_MB_TYPE} isFixed={true} />
@@ -86,10 +85,10 @@ export const ParamsOutput: React.FC<ParamsOutputProps> = ({ params }) => {
               <ParamItem name="GPS1_MB_OFS_Y" value={params.GPS1_MB_OFS_Y} />
               <ParamItem name="GPS1_MB_OFS_Z" value={params.GPS1_MB_OFS_Z} />
               
-              <div className="text-[10px] text-zinc-600 font-mono px-1 mt-2">Position Offsets</div>
+              <div className="text-[10px] text-zinc-600 font-mono px-1 mt-2">Position Offsets (Master)</div>
               <ParamItem name="GPS1_POS_X" value={params.GPS1_POS_X} />
               <ParamItem name="GPS1_POS_Y" value={params.GPS1_POS_Y} />
-              <ParamItem name="GPS2_POS_Z" value={params.GPS2_POS_Z} />
+              <ParamItem name="GPS1_POS_Z" value={params.GPS1_POS_Z} />
            </div>
         </div>
       </div>

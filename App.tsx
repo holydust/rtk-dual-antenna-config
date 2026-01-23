@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Settings2, Info } from 'lucide-react';
 import { Visualizer } from './components/Visualizer';
@@ -25,12 +24,15 @@ const App: React.FC = () => {
   const params = useMemo((): ArduParams => {
     return {
       GPS1_MB_TYPE: 1,
-      GPS1_MB_OFS_X: config.slave.x - config.master.x,
-      GPS1_MB_OFS_Y: config.slave.y - config.master.y,
-      GPS1_MB_OFS_Z: config.slave.z - config.master.z,
+      // 根据 ArduPilot 文档: GPS1_MB_TYPE = 1 是从 Slave 到 Master 的偏移
+      // 逻辑: Master - Slave
+      GPS1_MB_OFS_X: config.master.x - config.slave.x,
+      GPS1_MB_OFS_Y: config.master.y - config.slave.y,
+      GPS1_MB_OFS_Z: config.master.z - config.slave.z,
+      // 针对 Master 天线相对于飞控中心的偏移
       GPS1_POS_X: config.master.x,
       GPS1_POS_Y: config.master.y,
-      GPS2_POS_Z: config.slave.z,
+      GPS1_POS_Z: config.master.z,
     };
   }, [config]);
 
@@ -87,8 +89,8 @@ const App: React.FC = () => {
         <div className="flex-1 relative">
            <Visualizer config={config} />
            
-           {/* Center Labels */}
-           <div className="absolute top-24 right-6 w-72 flex flex-col gap-4 pointer-events-none">
+           {/* Center Labels - Reduced width to w-60 (approx 240px) */}
+           <div className="absolute top-24 right-6 w-60 flex flex-col gap-4 pointer-events-none">
               <ParamsOutput params={params} />
            </div>
 
