@@ -1,17 +1,25 @@
+
 import React, { useState } from 'react';
-import { ArduParams } from '../types';
+import { ArduParams, Px4Params, FlightControllerMode } from '../types';
 import { Clipboard, CheckCircle2 } from 'lucide-react';
 
 interface ParamsOutputProps {
-  params: ArduParams;
+  mode: FlightControllerMode;
+  arduParams: ArduParams;
+  px4Params: Px4Params;
 }
 
-const ParamItem = ({ name, value, isFixed }: { name: string, value: number, isFixed?: boolean }) => {
+const ParamItem = ({ name, value, isFixed, highlight }: { name: string, value: string | number, isFixed?: boolean, highlight?: boolean }) => {
   const [copied, setCopied] = useState(false);
-  const formattedValue = isFixed ? value.toString() : value.toFixed(3);
+  
+  // Format the display value
+  let displayValue = value.toString();
+  if (typeof value === 'number' && !Number.isInteger(value)) {
+    displayValue = value.toFixed(3);
+  }
 
   const copy = () => {
-    navigator.clipboard.writeText(formattedValue);
+    navigator.clipboard.writeText(displayValue);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -20,77 +28,114 @@ const ParamItem = ({ name, value, isFixed }: { name: string, value: number, isFi
     <div className={`group flex items-center justify-between p-2 rounded-lg border transition-all pointer-events-auto ${
       isFixed 
         ? 'bg-zinc-800/50 border-zinc-700/50' 
-        : 'bg-zinc-950/60 border-zinc-800/50 hover:bg-zinc-900'
+        : highlight
+          ? 'bg-indigo-950/30 border-indigo-500/30 hover:bg-indigo-900/20'
+          : 'bg-zinc-950/60 border-zinc-800/50 hover:bg-zinc-900'
     }`}>
-      <div className="flex flex-col">
-        <span className="text-[9px] font-bold text-zinc-500 tracking-wider uppercase">{name}</span>
-        <span className={`font-mono text-white ${isFixed ? 'text-base font-bold' : 'text-sm'}`}>
-          {formattedValue}
+      <div className="flex flex-col overflow-hidden">
+        <span className="text-[9px] font-bold text-zinc-500 tracking-wider uppercase truncate pr-2">{name}</span>
+        <span className={`font-mono text-white truncate ${isFixed ? 'text-base font-bold' : 'text-sm'}`}>
+          {displayValue}
         </span>
       </div>
       <button 
         onClick={copy}
-        className="p-1.5 text-zinc-600 hover:text-cyan-400 rounded transition-colors"
+        className={`p-1.5 rounded transition-colors shrink-0 ${copied ? 'text-green-500' : 'text-zinc-600 hover:text-white'}`}
       >
-        {copied ? <CheckCircle2 size={14} className="text-green-500" /> : <Clipboard size={14} />}
+        {copied ? <CheckCircle2 size={14} /> : <Clipboard size={14} />}
       </button>
     </div>
   );
 };
 
-export const ParamsOutput: React.FC<ParamsOutputProps> = ({ params }) => {
+export const ParamsOutput: React.FC<ParamsOutputProps> = ({ mode, arduParams, px4Params }) => {
   const handleCopyAll = () => {
-    const text = [
-      `GPS1_TYPE = 25`,
-      `GPS1_MB_TYPE = ${params.GPS1_MB_TYPE}`,
-      `GPS1_MB_OFS_X = ${params.GPS1_MB_OFS_X.toFixed(3)}`,
-      `GPS1_MB_OFS_Y = ${params.GPS1_MB_OFS_Y.toFixed(3)}`,
-      `GPS1_MB_OFS_Z = ${params.GPS1_MB_OFS_Z.toFixed(3)}`,
-      `GPS1_POS_X = ${params.GPS1_POS_X.toFixed(3)}`,
-      `GPS1_POS_Y = ${params.GPS1_POS_Y.toFixed(3)}`,
-      `GPS1_POS_Z = ${params.GPS1_POS_Z.toFixed(3)}`,
-    ].join('\n');
+    let text = "";
+    
+    if (mode === 'ardupilot') {
+      text = [
+        `GPS1_TYPE = 25`,
+        `GPS1_MB_TYPE = ${arduParams.GPS1_MB_TYPE}`,
+        `GPS1_MB_OFS_X = ${arduParams.GPS1_MB_OFS_X.toFixed(3)}`,
+        `GPS1_MB_OFS_Y = ${arduParams.GPS1_MB_OFS_Y.toFixed(3)}`,
+        `GPS1_MB_OFS_Z = ${arduParams.GPS1_MB_OFS_Z.toFixed(3)}`,
+        `GPS1_POS_X = ${arduParams.GPS1_POS_X.toFixed(3)}`,
+        `GPS1_POS_Y = ${arduParams.GPS1_POS_Y.toFixed(3)}`,
+        `GPS1_POS_Z = ${arduParams.GPS1_POS_Z.toFixed(3)}`,
+      ].join('\n');
+    } else {
+      text = [
+        `GPS_1_PROTOCOL = ${px4Params.GPS_1_PROTOCOL}`,
+        `EKF2_GPS_CTRL = ${px4Params.EKF2_GPS_CTRL}`,
+        `GPS_YAW_OFFSET = ${px4Params.GPS_YAW_OFFSET.toFixed(1)}`,
+      ].join('\n');
+    }
+
     navigator.clipboard.writeText(text);
-    alert('All parameters copied to clipboard!');
+    alert(`${mode === 'ardupilot' ? 'ArduPilot' : 'PX4'} parameters copied!`);
   };
+
+  const themeColor = mode === 'ardupilot' ? 'text-cyan-500 hover:text-cyan-400' : 'text-purple-500 hover:text-purple-400';
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between mb-1">
-         <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-1">Parameters</h2>
+         <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-1">
+           {mode === 'ardupilot' ? 'ArduPilot Params' : 'PX4 Params'}
+         </h2>
       </div>
 
       <div className="space-y-3">
-        {/* Fixed Parameters Section */}
-        <div className="flex flex-col gap-1">
-          <ParamItem name="GPS1_TYPE" value={25} isFixed={true} />
-          <ParamItem name="GPS1_MB_TYPE" value={params.GPS1_MB_TYPE} isFixed={true} />
-        </div>
-        
-        {/* Results Section with Copy Button Header */}
-        <div>
-           <div className="flex justify-between items-end mb-1.5 px-1 mt-2">
-              <span className="text-[10px] text-zinc-500 font-bold uppercase">Calculated Results</span>
-              <button 
-                onClick={handleCopyAll}
-                className="text-[10px] text-cyan-500 hover:text-cyan-400 uppercase font-bold tracking-tight pointer-events-auto"
-              >
-                Copy All
-              </button>
-           </div>
-           
-           <div className="space-y-1">
-              <div className="text-[10px] text-zinc-600 font-mono px-1">Moving Baseline Offsets</div>
-              <ParamItem name="GPS1_MB_OFS_X" value={params.GPS1_MB_OFS_X} />
-              <ParamItem name="GPS1_MB_OFS_Y" value={params.GPS1_MB_OFS_Y} />
-              <ParamItem name="GPS1_MB_OFS_Z" value={params.GPS1_MB_OFS_Z} />
-              
-              <div className="text-[10px] text-zinc-600 font-mono px-1 mt-2">Position Offsets (Master)</div>
-              <ParamItem name="GPS1_POS_X" value={params.GPS1_POS_X} />
-              <ParamItem name="GPS1_POS_Y" value={params.GPS1_POS_Y} />
-              <ParamItem name="GPS1_POS_Z" value={params.GPS1_POS_Z} />
-           </div>
-        </div>
+        {mode === 'ardupilot' ? (
+          <>
+            {/* ArduPilot Fixed */}
+            <div className="flex flex-col gap-1">
+              <ParamItem name="GPS1_TYPE" value={25} isFixed={true} />
+              <ParamItem name="GPS1_MB_TYPE" value={arduParams.GPS1_MB_TYPE} isFixed={true} />
+            </div>
+            
+            {/* ArduPilot Calculated */}
+            <div>
+              <div className="flex justify-between items-end mb-1.5 px-1 mt-2">
+                  <span className="text-[10px] text-zinc-500 font-bold uppercase">Calculated</span>
+                  <button onClick={handleCopyAll} className={`text-[10px] uppercase font-bold tracking-tight pointer-events-auto ${themeColor}`}>
+                    Copy All
+                  </button>
+              </div>
+              <div className="space-y-1">
+                  <ParamItem name="GPS1_MB_OFS_X" value={arduParams.GPS1_MB_OFS_X} />
+                  <ParamItem name="GPS1_MB_OFS_Y" value={arduParams.GPS1_MB_OFS_Y} />
+                  <ParamItem name="GPS1_MB_OFS_Z" value={arduParams.GPS1_MB_OFS_Z} />
+                  <div className="h-1"></div>
+                  <ParamItem name="GPS1_POS_X" value={arduParams.GPS1_POS_X} />
+                  <ParamItem name="GPS1_POS_Y" value={arduParams.GPS1_POS_Y} />
+                  <ParamItem name="GPS1_POS_Z" value={arduParams.GPS1_POS_Z} />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* PX4 Fixed / Setup */}
+            <div className="flex flex-col gap-1">
+              <ParamItem name="GPS_1_PROTOCOL" value={px4Params.GPS_1_PROTOCOL} isFixed={true} />
+              <ParamItem name="EKF2_GPS_CTRL" value="15 (Dual Antenna)" isFixed={true} />
+            </div>
+
+            {/* PX4 Calculated */}
+            <div>
+               <div className="flex justify-between items-end mb-1.5 px-1 mt-2">
+                  <span className="text-[10px] text-zinc-500 font-bold uppercase">Calculated</span>
+                  <button onClick={handleCopyAll} className={`text-[10px] uppercase font-bold tracking-tight pointer-events-auto ${themeColor}`}>
+                    Copy All
+                  </button>
+               </div>
+               <div className="space-y-1">
+                  {/* Highlight Yaw Offset as it is the most critical PX4 param */}
+                  <ParamItem name="GPS_YAW_OFFSET" value={px4Params.GPS_YAW_OFFSET} highlight={true} />
+               </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

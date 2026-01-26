@@ -1,5 +1,5 @@
 
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -21,6 +21,14 @@ function createWindow() {
     },
     // 隐藏默认菜单栏（可选）
     autoHideMenuBar: true, 
+  });
+
+  // 关键修复：拦截 window.open，使用系统默认浏览器打开链接
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
   });
 
   // 判断环境：开发模式加载 localhost，生产模式加载打包后的 html

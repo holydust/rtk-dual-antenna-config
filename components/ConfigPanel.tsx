@@ -8,19 +8,73 @@ interface ConfigPanelProps {
   onChange: (config: AntennaConfig) => void;
 }
 
+const AxisControl = ({
+  label,
+  icon: Icon,
+  iconColor,
+  value,
+  onChange,
+  accentClass
+}: {
+  label: string;
+  icon: React.ComponentType<any>;
+  iconColor: string;
+  value: number;
+  onChange: (val: string) => void;
+  accentClass: string;
+}) => {
+  return (
+    <div className="bg-zinc-950/50 rounded-lg p-2.5 border border-zinc-800/50 hover:border-zinc-700/80 transition-colors">
+      <div className="flex justify-between items-center mb-2">
+        <label className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-2">
+          <Icon size={12} className={iconColor} /> {label}
+        </label>
+        <span className="text-[10px] text-zinc-600 font-mono">meters</span>
+      </div>
+      
+      <div className="flex items-center gap-3">
+        {/* Slider Control */}
+        <input
+          type="range"
+          min="-2"
+          max="2"
+          step="0.01"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-zinc-900 focus:ring-zinc-600 ${accentClass}`}
+        />
+        
+        {/* Number Input */}
+        <input
+          type="number"
+          step="0.01"
+          min="-2"
+          max="2"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-16 bg-zinc-900 border border-zinc-800 rounded px-2 py-1 text-xs text-right focus:outline-none focus:border-zinc-600 focus:text-white transition-colors font-mono text-zinc-300"
+        />
+      </div>
+    </div>
+  );
+};
+
 const InputGroup = ({ 
   label, 
   value, 
   onChange, 
-  color 
+  headerColor,
+  accentClass
 }: { 
   label: string, 
   value: Vector3D, 
   onChange: (v: Vector3D) => void,
-  color: string 
+  headerColor: string,
+  accentClass: string
 }) => {
   const handleChange = (axis: keyof Vector3D, val: string) => {
-    let num = parseFloat(val) || 0;
+    let num = parseFloat(val);
+    if (isNaN(num)) num = 0;
     
     // 限制输入范围在 -2 到 2 之间
     if (num > 2) num = 2;
@@ -30,69 +84,37 @@ const InputGroup = ({
   };
 
   return (
-    <div className="space-y-4 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 transition-all hover:border-zinc-700">
-      <div className="flex items-center gap-2">
-        <div className={`w-2 h-2 rounded-full ${color}`}></div>
+    <div className="space-y-3 p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-sm">
+      <div className="flex items-center gap-2 mb-1">
+        <div className={`w-2 h-2 rounded-full ${headerColor}`}></div>
         <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-300">{label}</h3>
       </div>
       
-      <div className="grid grid-cols-1 gap-3">
-        {/* X Input */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex justify-between items-center px-1">
-            <label className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
-              <MoveVertical size={10} className="text-red-500" /> Forward (X)
-            </label>
-            <span className="text-[10px] text-zinc-600">meters</span>
-          </div>
-          <input 
-            type="number" 
-            step="0.01"
-            min="-2"
-            max="2"
-            value={value.x}
-            onChange={(e) => handleChange('x', e.target.value)}
-            className="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors font-mono"
-          />
-        </div>
-
-        {/* Y Input */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex justify-between items-center px-1">
-            <label className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
-              <MoveHorizontal size={10} className="text-green-500" /> Right (Y)
-            </label>
-            <span className="text-[10px] text-zinc-600">meters</span>
-          </div>
-          <input 
-            type="number" 
-            step="0.01"
-            min="-2"
-            max="2"
-            value={value.y}
-            onChange={(e) => handleChange('y', e.target.value)}
-            className="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors font-mono"
-          />
-        </div>
-
-        {/* Z Input */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex justify-between items-center px-1">
-            <label className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
-              <ArrowUpDown size={10} className="text-blue-500" /> Down (Z)
-            </label>
-            <span className="text-[10px] text-zinc-600">meters</span>
-          </div>
-          <input 
-            type="number" 
-            step="0.01"
-            min="-2"
-            max="2"
-            value={value.z}
-            onChange={(e) => handleChange('z', e.target.value)}
-            className="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 transition-colors font-mono"
-          />
-        </div>
+      <div className="grid grid-cols-1 gap-2">
+        <AxisControl 
+          label="Forward (X)" 
+          icon={MoveVertical} 
+          iconColor="text-red-500" 
+          value={value.x} 
+          onChange={(v) => handleChange('x', v)}
+          accentClass={accentClass}
+        />
+        <AxisControl 
+          label="Right (Y)" 
+          icon={MoveHorizontal} 
+          iconColor="text-green-500" 
+          value={value.y} 
+          onChange={(v) => handleChange('y', v)}
+          accentClass={accentClass}
+        />
+        <AxisControl 
+          label="Down (Z)" 
+          icon={ArrowUpDown} 
+          iconColor="text-blue-500" 
+          value={value.z} 
+          onChange={(v) => handleChange('z', v)}
+          accentClass={accentClass}
+        />
       </div>
     </div>
   );
@@ -105,13 +127,15 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({ config, onChange }) =>
         label="Master Antenna" 
         value={config.master} 
         onChange={(v) => onChange({ ...config, master: v })} 
-        color="bg-cyan-500"
+        headerColor="bg-cyan-500"
+        accentClass="accent-cyan-500"
       />
       <InputGroup 
         label="Slave Antenna" 
         value={config.slave} 
         onChange={(v) => onChange({ ...config, slave: v })} 
-        color="bg-orange-500"
+        headerColor="bg-orange-500"
+        accentClass="accent-orange-500"
       />
     </div>
   );
