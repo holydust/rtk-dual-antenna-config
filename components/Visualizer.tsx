@@ -1,27 +1,9 @@
+
 import React, { useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, PerspectiveCamera, Line, Html, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 import { AntennaConfig } from '../types';
-
-// Explicitly declare intrinsic elements to fix TypeScript errors when R3F types are missing or conflicting
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      group: any;
-      mesh: any;
-      meshStandardMaterial: any;
-      meshBasicMaterial: any;
-      planeGeometry: any;
-      shapeGeometry: any;
-      cylinderGeometry: any;
-      ambientLight: any;
-      spotLight: any;
-      pointLight: any;
-      directionalLight: any;
-    }
-  }
-}
 
 interface VisualizerProps {
   config: AntennaConfig;
@@ -125,7 +107,7 @@ const ReferenceAxes = () => {
       <Line points={[[0,0,0], [0, -length, 0]]} color="#3b82f6" dashed dashScale={20} opacity={0.5} transparent lineWidth={1} />
     </group>
   );
-}
+};
 
 const GPSAntenna = ({ position, label, type }: { position: [number, number, number], label: string, type: 'master' | 'slave' }) => {
   const ringColor = type === 'master' ? '#06b6d4' : '#f97316';

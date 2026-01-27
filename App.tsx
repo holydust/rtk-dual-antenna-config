@@ -58,7 +58,7 @@ const App: React.FC = () => {
     
     return {
       EKF2_GPS_CTRL: 15, // Changed to 15 (Dual Antenna)
-      GPS_1_PROTOCOL: 'NMEA',
+      GPS_1_PROTOCOL: 6, // Changed to 6 (NMEA), handled in ParamsOutput
       GPS_YAW_OFFSET: angle,
     };
   }, [config]);
@@ -170,7 +170,7 @@ const App: React.FC = () => {
 
               {/* Panel Content */}
               <div className={`
-                 transition-all duration-300 origin-top-right w-64
+                 transition-all duration-300 origin-top-right w-52
                  ${showParams 
                    ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' 
                    : 'opacity-0 scale-95 -translate-y-4 pointer-events-none h-0 overflow-hidden'}

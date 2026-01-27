@@ -9,17 +9,31 @@ interface ParamsOutputProps {
   px4Params: Px4Params;
 }
 
-const ParamItem = ({ name, value, isFixed, highlight }: { name: string, value: string | number, isFixed?: boolean, highlight?: boolean }) => {
+interface ParamItemProps {
+  name: string;
+  value: string | number | React.ReactNode;
+  copyValue?: string;
+  isFixed?: boolean;
+  highlight?: boolean;
+}
+
+const ParamItem = ({ name, value, copyValue, isFixed, highlight }: ParamItemProps) => {
   const [copied, setCopied] = useState(false);
   
-  // Format the display value
-  let displayValue = value.toString();
-  if (typeof value === 'number' && !Number.isInteger(value)) {
-    displayValue = value.toFixed(3);
+  // Resolve display content and clipboard text
+  let content = value;
+  let textToCopy = copyValue;
+
+  if (typeof value === 'number') {
+    const formatted = !Number.isInteger(value) ? value.toFixed(3) : value.toString();
+    content = formatted;
+    if (!textToCopy) textToCopy = formatted;
+  } else if (typeof value === 'string' && !textToCopy) {
+    textToCopy = value;
   }
 
   const copy = () => {
-    navigator.clipboard.writeText(displayValue);
+    navigator.clipboard.writeText(textToCopy || "");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -32,11 +46,11 @@ const ParamItem = ({ name, value, isFixed, highlight }: { name: string, value: s
           ? 'bg-indigo-950/30 border-indigo-500/30 hover:bg-indigo-900/20'
           : 'bg-zinc-950/60 border-zinc-800/50 hover:bg-zinc-900'
     }`}>
-      <div className="flex flex-col overflow-hidden">
+      <div className="flex flex-col overflow-hidden min-w-0">
         <span className="text-[9px] font-bold text-zinc-500 tracking-wider uppercase truncate pr-2">{name}</span>
-        <span className={`font-mono text-white truncate ${isFixed ? 'text-base font-bold' : 'text-sm'}`}>
-          {displayValue}
-        </span>
+        <div className={`font-mono text-white truncate ${isFixed ? 'text-base font-bold' : 'text-sm'}`}>
+          {content}
+        </div>
       </div>
       <button 
         onClick={copy}
@@ -117,8 +131,28 @@ export const ParamsOutput: React.FC<ParamsOutputProps> = ({ mode, arduParams, px
           <>
             {/* PX4 Fixed / Setup */}
             <div className="flex flex-col gap-1">
-              <ParamItem name="GPS_1_PROTOCOL" value={px4Params.GPS_1_PROTOCOL} isFixed={true} />
-              <ParamItem name="EKF2_GPS_CTRL" value="15 (Dual Antenna)" isFixed={true} />
+              <ParamItem 
+                name="GPS_1_PROTOCOL" 
+                value={
+                  <div className="flex items-baseline gap-1.5 overflow-hidden">
+                    <span>6</span>
+                    <span className="text-[10px] text-zinc-500 font-normal truncate opacity-80" title="(NMEA)">(NMEA)</span>
+                  </div>
+                }
+                copyValue="6 (NMEA)"
+                isFixed={true} 
+              />
+              <ParamItem 
+                name="EKF2_GPS_CTRL" 
+                value={
+                  <div className="flex items-baseline gap-1.5 overflow-hidden">
+                    <span>15</span>
+                    <span className="text-[10px] text-zinc-500 font-normal truncate opacity-80" title="(Dual Antenna)">(Dual Antenna)</span>
+                  </div>
+                } 
+                copyValue="15 (Dual Antenna)"
+                isFixed={true} 
+              />
             </div>
 
             {/* PX4 Calculated */}

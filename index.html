@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,17 @@
     <title>CORVON RTK Configurator</title>
     <!-- Keep Tailwind CDN since no local CSS build is detected -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 彻底隐藏数字输入框的上下微调箭头 */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
 <script type="importmap">
 {
   "imports": {

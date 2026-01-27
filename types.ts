@@ -1,4 +1,6 @@
 
+import { ThreeElements } from '@react-three/fiber';
+
 export interface Vector3D {
   x: number;
   y: number;
@@ -26,4 +28,16 @@ export interface Px4Params {
   EKF2_GPS_CTRL: number; // Bitmask usually, or specific check
   GPS_1_PROTOCOL: number | string;
   GPS_YAW_OFFSET: number;
+}
+
+/**
+ * Global JSX augmentation to ensure React Three Fiber intrinsic elements
+ * (like <group>, <mesh>, etc.) are recognized by the TypeScript compiler.
+ */
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends ThreeElements {
+      [elemName: string]: any;
+    }
+  }
 }

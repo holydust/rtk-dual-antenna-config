@@ -1,7 +1,16 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AntennaConfig, Vector3D } from '../types';
 import { MoveHorizontal, MoveVertical, ArrowUpDown } from 'lucide-react';
+
+interface AxisControlProps {
+  label: string;
+  icon: React.ComponentType<any>;
+  iconColor: string;
+  value: number;
+  onChange: (val: string) => void;
+  accentClass: string;
+}
 
 interface ConfigPanelProps {
   config: AntennaConfig;
@@ -15,14 +24,44 @@ const AxisControl = ({
   value,
   onChange,
   accentClass
-}: {
-  label: string;
-  icon: React.ComponentType<any>;
-  iconColor: string;
-  value: number;
-  onChange: (val: string) => void;
-  accentClass: string;
-}) => {
+}: AxisControlProps) => {
+  // Use local state to handle the input display value.
+  // This allows temporary invalid states (like "-" or "1.") while typing
+  // without the parent component immediately overriding it with "0" or a parsed number.
+  const [localValue, setLocalValue] = useState(value.toFixed(2));
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Sync local state with prop value when not being edited
+  useEffect(() => {
+    if (!isFocused) {
+      setLocalValue(value.toFixed(2));
+    }
+  }, [value, isFocused]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVal = e.target.value;
+    setLocalValue(newVal);
+
+    // Filter out incomplete inputs before sending to parent
+    // Valid cases to propagate: "1", "-1", "1.2", "-1.2"
+    // Invalid/Incomplete cases: "", "-", ".", "-."
+    const isPartial = newVal === '' || newVal === '-' || newVal === '.' || newVal === '-.';
+    
+    if (!isPartial) {
+      const parsed = parseFloat(newVal);
+      if (!isNaN(parsed)) {
+        onChange(newVal);
+      }
+    }
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    // On blur, revert the display to the strictly formatted prop value
+    // This handles cases where user typed something invalid or out of bounds that got clamped by parent
+    setLocalValue(value.toFixed(2));
+  };
+
   return (
     <div className="bg-zinc-950/50 rounded-lg p-2.5 border border-zinc-800/50 hover:border-zinc-700/80 transition-colors">
       <div className="flex justify-between items-center mb-2">
@@ -36,22 +75,25 @@ const AxisControl = ({
         {/* Slider Control */}
         <input
           type="range"
-          min="-2"
-          max="2"
+          min="-2.00"
+          max="2.00"
           step="0.01"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            onChange(e.target.value);
+            // No need to setLocalValue here as useEffect handles it (since focus is not on text input)
+          }}
           className={`w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-zinc-900 focus:ring-zinc-600 ${accentClass}`}
         />
         
-        {/* Number Input */}
+        {/* Text Input (acting as number input) */}
         <input
-          type="number"
-          step="0.01"
-          min="-2"
-          max="2"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          type="text"
+          inputMode="decimal"
+          value={localValue}
+          onChange={handleInputChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={handleBlur}
           className="w-16 bg-zinc-900 border border-zinc-800 rounded px-2 py-1 text-xs text-right focus:outline-none focus:border-zinc-600 focus:text-white transition-colors font-mono text-zinc-300"
         />
       </div>
@@ -73,14 +115,18 @@ const InputGroup = ({
   accentClass: string
 }) => {
   const handleChange = (axis: keyof Vector3D, val: string) => {
+    // 1. Parse float
     let num = parseFloat(val);
     if (isNaN(num)) num = 0;
     
-    // 限制输入范围在 -2 到 2 之间
+    // 2. Clamp range -2 to 2
     if (num > 2) num = 2;
     if (num < -2) num = -2;
     
-    onChange({ ...value, [axis]: num });
+    // 3. Force 2 decimal precision to match slider step
+    const fixedNum = Number(num.toFixed(2));
+    
+    onChange({ ...value, [axis]: fixedNum });
   };
 
   return (
