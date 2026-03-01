@@ -46,7 +46,7 @@ const AxisControl = ({
     // Valid cases to propagate: "1", "-1", "1.2", "-1.2"
     // Invalid/Incomplete cases: "", "-", ".", "-."
     const isPartial = newVal === '' || newVal === '-' || newVal === '.' || newVal === '-.';
-    
+
     if (!isPartial) {
       const parsed = parseFloat(newVal);
       if (!isNaN(parsed)) {
@@ -70,7 +70,7 @@ const AxisControl = ({
         </label>
         <span className="text-[10px] text-zinc-600 font-mono">meters</span>
       </div>
-      
+
       <div className="flex items-center gap-3">
         {/* Slider Control */}
         <input
@@ -85,7 +85,7 @@ const AxisControl = ({
           }}
           className={`w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-zinc-900 focus:ring-zinc-600 ${accentClass}`}
         />
-        
+
         {/* Text Input (acting as number input) */}
         <input
           type="text"
@@ -101,15 +101,15 @@ const AxisControl = ({
   );
 };
 
-const InputGroup = ({ 
-  label, 
-  value, 
-  onChange, 
+const InputGroup = ({
+  label,
+  value,
+  onChange,
   headerColor,
   accentClass
-}: { 
-  label: string, 
-  value: Vector3D, 
+}: {
+  label: string,
+  value: Vector3D,
   onChange: (v: Vector3D) => void,
   headerColor: string,
   accentClass: string
@@ -118,46 +118,46 @@ const InputGroup = ({
     // 1. Parse float
     let num = parseFloat(val);
     if (isNaN(num)) num = 0;
-    
+
     // 2. Clamp range -2 to 2
     if (num > 2) num = 2;
     if (num < -2) num = -2;
-    
+
     // 3. Force 2 decimal precision to match slider step
     const fixedNum = Number(num.toFixed(2));
-    
+
     onChange({ ...value, [axis]: fixedNum });
   };
 
   return (
-    <div className="space-y-3 p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-sm">
+    <div className="space-y-2 p-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-sm">
       <div className="flex items-center gap-2 mb-1">
         <div className={`w-2 h-2 rounded-full ${headerColor}`}></div>
         <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-300">{label}</h3>
       </div>
-      
+
       <div className="grid grid-cols-1 gap-2">
-        <AxisControl 
-          label="Forward (X)" 
-          icon={MoveVertical} 
-          iconColor="text-red-500" 
-          value={value.x} 
+        <AxisControl
+          label="Forward (X)"
+          icon={MoveVertical}
+          iconColor="text-red-500"
+          value={value.x}
           onChange={(v) => handleChange('x', v)}
           accentClass={accentClass}
         />
-        <AxisControl 
-          label="Right (Y)" 
-          icon={MoveHorizontal} 
-          iconColor="text-green-500" 
-          value={value.y} 
+        <AxisControl
+          label="Right (Y)"
+          icon={MoveHorizontal}
+          iconColor="text-green-500"
+          value={value.y}
           onChange={(v) => handleChange('y', v)}
           accentClass={accentClass}
         />
-        <AxisControl 
-          label="Down (Z)" 
-          icon={ArrowUpDown} 
-          iconColor="text-blue-500" 
-          value={value.z} 
+        <AxisControl
+          label="Down (Z)"
+          icon={ArrowUpDown}
+          iconColor="text-blue-500"
+          value={value.z}
           onChange={(v) => handleChange('z', v)}
           accentClass={accentClass}
         />
@@ -168,18 +168,18 @@ const InputGroup = ({
 
 export const ConfigPanel: React.FC<ConfigPanelProps> = ({ config, onChange }) => {
   return (
-    <div className="flex flex-col gap-4">
-      <InputGroup 
-        label="Master Antenna" 
-        value={config.master} 
-        onChange={(v) => onChange({ ...config, master: v })} 
+    <div className="flex flex-col gap-3">
+      <InputGroup
+        label="Master Antenna"
+        value={config.master}
+        onChange={(v) => onChange({ ...config, master: v })}
         headerColor="bg-cyan-500"
         accentClass="accent-cyan-500"
       />
-      <InputGroup 
-        label="Slave Antenna" 
-        value={config.slave} 
-        onChange={(v) => onChange({ ...config, slave: v })} 
+      <InputGroup
+        label="Slave Antenna"
+        value={config.slave}
+        onChange={(v) => onChange({ ...config, slave: v })}
         headerColor="bg-orange-500"
         accentClass="accent-orange-500"
       />
